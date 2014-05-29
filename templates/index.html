@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>DS Upload</title>
+
+        <!-- Bootstrap -->
+        <link rel="stylesheet" type="text/css" href="bower_components/bootstrap/dist/css/bootstrap.css" />
+        <!--link rel="stylesheet" type="text/css" href="bower_components/bootstrap/dist/css/bootstrap.theme.css" /-->
+        <link rel="stylesheet" type="text/css" href="css/typeaheadjs.css" />
+
+        <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+        <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+        <!--[if lt IE 9]>
+            <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+            <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+        <![endif]-->
+    </head>
+
+    <body>
+        <div class="container center-block col-sm-4 voffset6" style="float:none;">
+            <h1>Select a project and upload to the Design Science archives</h1>
+
+            <form class="form-horizontal">
+                <div class="form-group">
+                    <label for="company" class="col-sm-2 control-label">Company</label>
+                    <div id="bhCompany" class="col-sm-10">
+                        <input class="typeahead form-control" type="text" id="company" name="company" placeholder="Company">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="project" class="col-sm-2 control-label">Project</label>
+                    <div id="bhProject" class="col-sm-10">
+                        <input disabled class=" typeahead form-control" type="text" id="project" name="project" placeholder="Project Code">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="phase" class="col-sm-2 control-label">Phase</label>
+                    <div id="bhPhase" class="col-sm-10">
+                        <select disabled class="form-control" id="phase" name="phase" placeholder="Project Phase">
+                            <option value="0">Select Project Phase</option>
+                            <option value="1">Select Project Phase</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="files" class="col-sm-2 control-label">Files</label>
+                    <div class="col-sm-10">
+                        <input disabled multiple class="" type="file" id="files" name="files[]">
+                        <p class="help-block">Example block-level help text here.</p>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <button disabled id="submit" type="button" class="btn btn-primary btn-lg btn-block">Begin Upload</button>
+                </div>
+            </form>
+
+            <div class="voffset6" id="fileDisp">
+            </div>
+        </div>
+
+
+        <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+        <!--script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script-->
+        <!-- Include all compiled plugins (below), or include individual files as needed -->
+        <script type="text/javascript" src="bower_components/jquery/dist/jquery.js"></script>
+        <script type="text/javascript" src="bower_components/underscore/underscore.js"></script>
+        <script type="text/javascript" src="bower_components/bootstrap/dist/js/bootstrap.js"></script>
+        <script type="text/javascript" src="bower_components/typeahead.js/dist/typeahead.bundle.js"></script>
+        <script type="text/javascript" src="js/uploader.js"></script>
+    </body>
+</html>
