@@ -20,7 +20,7 @@ function isValidProject(projects, string) {
     return returnVal;
 }
 
-function isValidPhase(string) {
+function isValidSubproj(string) {
     var count = parseInt(string);
     var returnVal;
     if (count > 0) {
@@ -38,7 +38,7 @@ function isValidFile(string) {
 }
 
 //test validity with the following
-function companyEval(){
+function companyEval() {
     if (isValidCompany(companyList, $("#company").val())) {
         $("#project").removeAttr("disabled");
         $("#project").css("background-color", "white")
@@ -49,18 +49,32 @@ function companyEval(){
 }
 
 
-function projectEval(){
+function projectEval() {
     if ($("#project").val().length > 0) {
         $("#company").attr("disabled", true);
     } else {
         $("#company").removeAttr("disabled");
     }
     if (isValidProject(projectList, $("#project").val())) {
-        $("#phase").removeAttr("disabled");
+        $("#subproject").removeAttr("disabled");
         console.log('worked')
     } else {
-        $("#phase").attr("disabled", true);
+        $("#subproject").attr("disabled", true);
     }
+}
+
+function subprojEval() {
+        console.log('subprojeval');
+        if ($("#subproject").val() > 0) {
+            $("#project").attr("disabled", true);
+        } else {
+            $("#project").removeAttr("disabled");
+        }
+        if (isValidSubproj($("#subproject").val())) {
+            $("#files").removeAttr("disabled");
+        } else {
+            $("#files").attr("disabled", true);
+        }
 }
 
 //typeahead event handlers
@@ -105,30 +119,46 @@ function fetchCompanies() {
 }
 
 function fetchProjects(companyIndex) {
+    var url = 'dstatus/api/clients/'
+    url = url + (companyIndex).toString();
+    url = url + '/projects'
     return $.ajax({
-        url: '/dstatus/api/clients/' + (companyIndex).toString() + '/projects',
+        url: url,
         success: function(data){
             var projs = data.projects;
-            projs = $.map(projs, function(obj,ind){return {val:obj.name}});
+            projs = _.map(projs, function(obj,ind){return {val:obj.name}});
             projects.clear();
             projects.add(projs);
-            projectList = $.map(projs, function(obj,ind){return obj.val});
+            projectList = _.map(projs, function(obj,ind){return obj.val});
         }
     });
 }
 
 function fetchSubprojects(companyIndex, projectIndex) {
     var url = '/dstatus/api/clients/';
+    var $subproj = $('select#subproject');
     url = url + (companyIndex).toString();
     url = url + '/projects/';
     url = url + (projectIndex).toString();
-    url = url + '/subprojects'
+    url = url + '/subprojects';
+    $subproj.empty();
+    $subproj.append('<option value="0">Select Project Phase</option>');
+    function insertSubproj (elem, ind, lst){
+        var insertion = '<option value="';
+        insertion = insertion + (ind+1).toString() + '">';
+        insertion = insertion + elem + '</option>';
+        $subproj.append(insertion);
+        return insertion
+    }
     return $.ajax({
         url: url,
         success: function(data){
             var subprojs = data.subprojects;
-            subprojs = $.map(subprojs, function(obj,ind){return {val:obj.name}});
-            subprojList = $.map(subprojs, function(obj,ind){return obj.val});
+            var subprojNames = _.map(subprojs, function(elem, ind, lst) {
+                return elem.name
+            });
+            _.each(subprojNames, insertSubproj);
+            subprojList = _.map(subprojs, function(obj,ind){return obj.val});
         }
     });
 }
@@ -181,32 +211,18 @@ $(document).ready(function(){
     }).on('typeahead:selected', onSelectedProject);
 
 
-    // company input change rules:
+    //input change rules:
     $("#company").on("input", function() {
         companyEval();
     });
-    // project input change rules:
     $("#project").on("input", function() {
         projectEval();
     });
-
-    // phase input change rules:
-    $("#phase").on("change", function() {
-        if ($("#phase").val() > 0) {
-            $("#project").attr("disabled", true);
-        } else {
-            $("#project").removeAttr("disabled");
-        }
-
-        if (isValidPhase($("#phase").val())) {
-            $("#files").removeAttr("disabled");
-        } else {
-            $("#files").attr("disabled", true);
-        }
+    $("#subproject").on("change", function() {
+        subprojEval();
     });
-
-    // file change rules:
     $("#files").change(function() {
+        //fileEval();
         $("#fileDisp").empty();
         if ($("#files")[0].files.length > 0) {
             $("#submit").removeAttr("disabled");
