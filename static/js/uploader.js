@@ -9,9 +9,15 @@ function isValidCompany(companies, string) {
     return returnVal;
 }
 
-function isValidProject(string) {
-    var re = /^[a-zA-Z0-9]{3}-[a-zA-Z0-9]{3}$/;
-    return re.test(string);
+function isValidProject(projects, string) {
+    var returnVal;
+    if (projects.indexOf(string) >= 0) {
+        returnVal = true;
+    } else {
+        returnVal = false;
+    }
+    console.log(returnVal);
+    return returnVal;
 }
 
 function isValidPhase(string) {
@@ -43,6 +49,21 @@ function companyEval(){
 }
 
 
+function projectEval(){
+    if ($("#project").val().length > 0) {
+        $("#company").attr("disabled", true);
+    } else {
+        $("#company").removeAttr("disabled");
+    }
+    if (isValidProject(projectList, $("#project").val())) {
+        $("#phase").removeAttr("disabled");
+        console.log('worked')
+    } else {
+        $("#phase").attr("disabled", true);
+    }
+}
+
+//typeahead event handlers
 function onSelectedCompany($e, datum) {
     console.log('selected');
     console.log(datum);
@@ -50,10 +71,25 @@ function onSelectedCompany($e, datum) {
 
     var company = $("#company").val();
     if (isValidCompany(companyList, company)) {
-        fetchProjects(companyList.indexOf(company));
+        var companyIndex = companyList.indexOf(company)+1
+        fetchProjects(companyIndex);
     }
-
 }
+
+function onSelectedProject($e, datum) {
+    console.log('selected');
+    console.log(datum);
+    projectEval();
+
+    var company = $("#company").val();
+    var project = $("#project").val();
+    if (isValidCompany(companyList, company)) {
+        var companyIndex = companyList.indexOf(company)+1
+        var projectIndex = projectList.indexOf(project)+1
+        fetchSubprojects(companyIndex, projectIndex);
+    }
+}
+
 
 function fetchCompanies() {
     return $.ajax({
@@ -70,7 +106,7 @@ function fetchCompanies() {
 
 function fetchProjects(companyIndex) {
     return $.ajax({
-        url: '/dstatus/api/clients/' + (companyIndex+1).toString() + '/projects',
+        url: '/dstatus/api/clients/' + (companyIndex).toString() + '/projects',
         success: function(data){
             var projs = data.projects;
             projs = $.map(projs, function(obj,ind){return {val:obj.name}});
@@ -81,12 +117,30 @@ function fetchProjects(companyIndex) {
     });
 }
 
+function fetchSubprojects(companyIndex, projectIndex) {
+    var url = '/dstatus/api/clients/';
+    url = url + (companyIndex).toString();
+    url = url + '/projects/';
+    url = url + (projectIndex).toString();
+    url = url + '/subprojects'
+    return $.ajax({
+        url: url,
+        success: function(data){
+            var subprojs = data.subprojects;
+            subprojs = $.map(subprojs, function(obj,ind){return {val:obj.name}});
+            subprojList = $.map(subprojs, function(obj,ind){return obj.val});
+        }
+    });
+}
 
 
 $(document).ready(function(){
 
+    //twitter typeahead setup
+    var companyList = [];
+    var projectList = [];
+    var subprojList = [];
 
-    companyList = []
     companies = new Bloodhound({
         datumTokenizer: Bloodhound.tokenizers.obj.whitespace('val'),
         queryTokenizer: Bloodhound.tokenizers.whitespace,
@@ -94,7 +148,6 @@ $(document).ready(function(){
     });
     companies.initialize();
 
-    projectList = [];
     projects = new Bloodhound({
         datumTokenizer: Bloodhound.tokenizers.obj.whitespace('val'),
         queryTokenizer: Bloodhound.tokenizers.whitespace,
@@ -102,16 +155,9 @@ $(document).ready(function(){
     });
     projects.initialize();
 
-    phaseList = [];
-    phases = new Bloodhound({
-        datumTokenizer: Bloodhound.tokenizers.obj.whitespace('val'),
-        queryTokenizer: Bloodhound.tokenizers.whitespace,
-        local: $.map(phaseList, function(phase) { return { val: phase }; })
-    });
-    phases.initialize();
-
     fetchCompanies();
 
+    //attaching typeahead to the DOM
     $('#bhCompany .typeahead').typeahead({
         hint: true,
         highlight: true,
@@ -132,26 +178,16 @@ $(document).ready(function(){
         name: 'projects',
         displayKey: 'val',
         source: projects.ttAdapter()
-    }).on('typeahead:selected', onSelectedCompany);
+    }).on('typeahead:selected', onSelectedProject);
+
 
     // company input change rules:
     $("#company").on("input", function() {
         companyEval();
     });
-
     // project input change rules:
     $("#project").on("input", function() {
-        if ($("#project").val().length > 0) {
-            $("#company").attr("disabled", true);
-        } else {
-            $("#company").removeAttr("disabled");
-        }
-
-        if (isValidProject($("#project").val())) {
-            $("#phase").removeAttr("disabled");
-        } else {
-            $("#phase").attr("disabled", true);
-        }
+        projectEval();
     });
 
     // phase input change rules:
