@@ -164,6 +164,55 @@ function fetchSubprojects(companyIndex, projectIndex) {
 }
 
 
+files = (function($, _) {
+    var f, inFiles, presentation;
+    f = {};
+    inFiles = $("input#fileinput");
+    presentation = $('table tbody.files')
+    f.list = function(){
+        return inFiles.get(0).files;
+    };
+    f.display = function(){
+        addFileRow = function(elem, index, list) {
+            var name, type, size;
+            name = elem.name;
+            type = elem.type;
+            size = (elem.size/1000000).toFixed(2) + ' MB'
+            if (type.slice(0,5) === 'video') {
+                presentation.append('<tr><td>'+name+'</td><td>'+type+'</td><td>'+size+'</td></tr>')
+            } else {
+                presentation.append('<tr class="danger"><td>'+name+'</td><td>'+type+'</td><td>'+size+'</td></tr>')
+            }
+        };
+        presentation.empty();
+        _.each(f.list(), addFileRow);
+    }
+    f.pres = $("table#filepres tbody.files");
+
+    return f;
+}(jQuery, _));
+
+var asdf
+tst = function(){
+    var formData = new FormData();
+    formData.append('company', $('input#company').val())
+    formData.append('project', $('input#project').val())
+    formData.append('subproject', $('select#subproject option:selected').val())
+    _.each($('input#fileinput').get(0).files, function(file, i){
+            formData.append('file-'+i, file);
+    });
+    console.log(formData)
+    $.ajax({
+        url: '/sendfiles',
+        type: 'POST',
+        dataType: 'json',
+        data: formData,
+        cache: false,
+        contentType: false,
+        processData: false
+    });
+}
+
 $(document).ready(function(){
 
     //twitter typeahead setup
@@ -212,15 +261,17 @@ $(document).ready(function(){
 
 
     //input change rules:
-    $("#company").on("input", function() {
+    $("#company").on('input', function() {
         companyEval();
     });
-    $("#project").on("input", function() {
+    $("#project").on('input', function() {
         projectEval();
     });
-    $("#subproject").on("change", function() {
+    $("#subproject").change(function() {
         subprojEval();
     });
+    $("#fileinput").change(function(){files.display()});
+
     $("#files").change(function() {
         //fileEval();
         $("#fileDisp").empty();
@@ -231,6 +282,26 @@ $(document).ready(function(){
         }
         _.each($("#files")[0].files, function(file) {
             $("#fileDisp").append('<span class="list-group-item list-group-item-success">'+ file.name + '</span>')
+        });
+    });
+
+    $("button#upload-btn").click(function(){
+        var formData = new FormData(files.list());
+        $.ajax({
+            url: '/sendfiles',
+            type: 'POST',
+            //xhr: function() {
+            //    var myXhr = $.ajaxSettings.xhr();
+            //    if(myXhr.upload) {
+            //        myXhr.upload.addEventListener('progress', progressHandlingFunction, false);
+            //    }
+            //    return myXhr;
+            //},
+            //beforeSend, success, error
+            data: formData,
+            cache: false,
+            contentType: false,
+            processData: false
         });
     });
 
