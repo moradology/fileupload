@@ -10,6 +10,7 @@ from flask.ext.restful import Api, Resource, reqparse, fields, marshal
 from flask.ext.httpauth import HTTPBasicAuth
 from werkzeug.utils import secure_filename
 import os
+import base64
 
 app = Flask(__name__, static_url_path = "")
 api = Api(app)
@@ -29,23 +30,132 @@ def get_pass(username):
         return 'testing'
     return None
 
-ALLOWED_EXTENSIONS = set(['txt', 'pdf'])
-def allowed_file(filename):
+
+VIDEO_ROOT = '/var/store/video/'
+DOCUMENT_ROOT = '/var/store/docs/'
+DOCUMENTS = ['txt', 'xls', 'xlsx', 'pdf', 'doc', 'docx', 'odt', 'ppt', 'pptx', 'csv']
+PICTURES = ['jpg', 'svg', 'png', 'bmp', 'jpeg']
+VIDEOS = ['mp4', 'mov', 'm4v', 'avi', 'wmv']
+DATABASES = ['db']
+
+ALLOWED_VIDEO = set(VIDEOS)
+ALLOWED_DOCUMENTS = set(DOCUMENTS + PICTURES + DATABASES)
+ALLOWED_EXTENSIONS = set(DOCUMENTS + PICTURES + VIDEOS + DATABASES)
+
+def is_allowed(filename, criteria):
     """a"""
     return '.' in filename and \
-            filename.rsplit('.', 1)[1] in ALLOWED_EXTENSIONS
+            filename.rsplit('.', 1)[1] in criteria
 
 
-@app.route('/sendfiles', methods=['POST'])
+@app.route('/getfilesize', methods=['POST'])
+def query_filesize():
+    """Receive POST data containing a filename"""
+
+
+    current_size = None
+
+    # video or docs
+    if is_allowed(request.form.get('file'), ALLOWED_VIDEO):
+        root = VIDEO_ROOT
+    elif is_allowed(request.form.get('file'), ALLOWED_DOCUMENTS):
+        root = DOCUMENT_ROOT
+    else:
+        return jsonify({'error': '405: filetype not allowed',\
+                'status': 'error'})
+
+    path = os.path.join(root, request.form.get('company'),\
+            request.form.get('project'), request.form.get('subproject'),\
+            request.form.get('file'))
+
+    if os.path.isfile(path):
+        return jsonify({'error': 'file already uploaded', 'status': 'uploaded'})
+    elif not os.path.isfile(path + '.part'):
+        current_size = 0
+    else:
+        current_size = os.stat(path + '.part').st_size
+
+    status = 'in progress'
+    return jsonify({"server_size":current_size, "status":status})
+
+
+@app.route('/chunked_send', methods=['POST'])
+def chunked_transmission():
+    """Receive POST of a portion of a file; handle data appropriately"""
+    ajax = request.form
+    data = ajax.get("data")
+
+    ext = ajax.get("extension")
+    if ext in ALLOWED_VIDEO:
+        root = VIDEO_ROOT
+    elif ext in ALLOWED_DOCUMENTS:
+        root = DOCUMENT_ROOT
+    else:
+        return jsonify({'ERROR': '405: filetype not allowed'})
+
+    path = os.path.join(root, request.form.get('company'),\
+            request.form.get('project'), request.form.get('subproject'),\
+            request.form.get('file')+'.part')
+
+    chunk_count = int(ajax.get("intent"))
+
+    if chunk_count > 1:
+        with open(path, 'a') as f:
+            f.write(data)
+    else:
+        with open(path, 'w') as f:
+            f.write(data)
+
+    if os.path.isfile(path):
+        fileSize = os.stat(path).st_size
+    else:
+        fileSize = None
+
+    return jsonify({"serverSize": fileSize, "intent": ajax.get('intent')})
+
+
+@app.route('/finish_send', methods=['POST'])
+def end_transmission():
+    """End transmission and convert from base64 back to binary"""
+    ajax = request.form
+
+    ext = ajax.get("extension")
+    if ext in ALLOWED_VIDEO:
+        root = VIDEO_ROOT
+    elif ext in ALLOWED_DOCUMENTS:
+        root = DOCUMENT_ROOT
+    else:
+        return jsonify({'ERROR': '405: filetype not allowed'})
+
+    path = os.path.join(root, request.form.get('company'),\
+            request.form.get('project'), request.form.get('subproject'),\
+            request.form.get('file'))
+
+    with open(path+'.part', 'r') as in_file:
+        with open(path, 'w') as out_file:
+            base64.decode(in_file, out_file)
+    os.remove(path+'.part')
+
+    return jsonify({"status": "uploaded"})
+
+
+@app.route('/send_file', methods=['POST'])
 def upload_file():
-    """a"""
-    print request.form
-    print request.files
-    return str(request.files)
+    """Receive POST data containing at least one file upload"""
+    ajax = request.form
+    sent_file = request.files.values()[0]
 
-    if the_file and allowed_file(the_file.filename):
-        the_file.save(os.path.join(request.saveto, the_file.filename))
-        return
+    if is_allowed(sent_file.filename, ALLOWED_VIDEO):
+        root = VIDEO_ROOT
+    elif is_allowed(sent_file.filename, ALLOWED_DOCUMENTS):
+        root = DOCUMENT_ROOT
+    else:
+        return jsonify({'error': '405: invalid filetype'})
+
+    sent_file.save(os.path.join(root, ajax.get('company'), ajax.get('project'),\
+            ajax.get('subproject'), secure_filename(sent_file.filename)))
+
+    return jsonify({'status': 'success'})
 
 
 @app.errorhandler(404)
@@ -344,7 +454,7 @@ class ParticipantAPI(Resource):
 
         # get subproject name
         subprojects = subproject_list(clientname, projectname)
-        subprojects = makeSubproj(subprojects, cli_id, proj_id)
+        subprojects = make_subproj(subprojects, cli_id, proj_id)
         subprojectname = [x for x in subprojects\
                 if x.get('subproj_id') == subproj_id][0].get('name')
 
@@ -380,7 +490,7 @@ def add_resources():
 
     # subproject
     subprojects_string = project_string + '/subprojects'
-    api.add_resource(SubprojectListAPI, subprojects_string,
+    api.add_resource(SubprojectListAPI, subprojects_string,\
             endpoint='subprojects')
 
     subproject_string = subprojects_string + '/<int:subproj_id>'
@@ -388,7 +498,7 @@ def add_resources():
 
     # participant
     participants_string = subproject_string + '/participants'
-    api.add_resource(ParticipantListAPI, participants_string,
+    api.add_resource(ParticipantListAPI, participants_string,\
             endpoint='participants')
 
     participant_string = participants_string + '/<int:participant_id>'
