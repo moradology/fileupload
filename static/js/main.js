@@ -183,13 +183,23 @@ BigFile = function(file){
         return (bf.serverSize === bf.targetSize)
     }
 
+    bf.isNotAllowed = function() {
+        return (bf.error === "405: filetype not allowed")
+    }
+
     bf.send = function(){
-        files.fileTableRows().eq(files.currentFile-1).removeClass('danger');
-        if (self.isUploaded) {
-            files.fileTableRows().eq(files.currentFile-1).addClass('success');
+        var currentFile = files.currentFile
+        var changeStatus = function(oldClass, newClass) {
+            files.fileTableRows().eq(currentFile).removeClass(oldClass);
+            files.fileTableRows().eq(currentFile).addClass(newClass);
+        }
+        if (bf.isUploaded()) {
+            changeStatus('danger', 'success');
+            files.sendNext();
+        } else if (bf.isNotAllowed()) {
             files.sendNext();
         } else {
-            files.fileTableRows().eq(files.currentFile-1).addClass('warning');
+            changeStatus('danger', 'warning');
             var fd;
             fd = new FormData();
             fd.append('company', $('input#company').val());
@@ -207,9 +217,7 @@ BigFile = function(file){
                 processData: false,
             }).success(function(r){
                 console.log(r);
-                files.fileTableRows().eq(files.currentFile-1).addClass('success');
-                console.log(files.fileTableRows().eq(files.currentFile-1))
-                console.log(files.currentFile-1)
+                changeStatus('warning', 'success');
                 files.sendNext();
             });
         }
@@ -262,10 +270,10 @@ files = (function($, _) {
     }
 
     f.sendNext = function() {
-        if (fileCount > 0) {
+        if (fileCount > 0 && typeof(fileCount) === typeof(0)) {
+            fileCount = fileCount - 1;
+            f.currentFile = f.currentFile + 1;
             f.registeredFiles[f.currentFile].send();
-            f.currentFile += 1;
-            fileCount -= 1;
         }
     }
 
@@ -289,7 +297,7 @@ files = (function($, _) {
         };
         presentation.empty();
         fileCount = f.list().length;
-        f.currentFile = 0;
+        f.currentFile = -1;
         registerFiles();
         _.each(f.list(), addFileRow);
         if (f.list().length > 0) {
@@ -399,18 +407,7 @@ $(document).ready(function(){
 
     $("button#upload-btn").click(function(e){
         e.preventDefault();
-
-        var formData = new FormData();
-        formData.append('company', $('input#company').val())
-        formData.append('project', $('input#project').val())
-        formData.append('subproject', $('select#subproject option:selected').text())
-        _.each($('input#fileinput').get(0).files, function(file, i){
-            if (isGoodSize(file.size)) {
-                formData.append('file-'+i, file);
-            } else {
-                console.log("file too large");
-            }
-        });
+        files.sendNext();
     });
 
 
