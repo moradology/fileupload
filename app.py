@@ -33,7 +33,8 @@ def get_pass(username):
 
 VIDEO_ROOT = '/var/store/video/'
 DOCUMENT_ROOT = '/var/store/docs/'
-DOCUMENTS = ['txt', 'xls', 'xlsx', 'pdf', 'doc', 'docx', 'odt', 'ppt', 'pptx', 'csv']
+DOCUMENTS = ['txt', 'xls', 'xlsx', 'pdf', 'doc', 'docx', 'odt', 'ppt', 'pptx',\
+        'csv']
 PICTURES = ['jpg', 'svg', 'png', 'bmp', 'jpeg']
 VIDEOS = ['mp4', 'mov', 'm4v', 'avi', 'wmv']
 DATABASES = ['db']
@@ -52,9 +53,6 @@ def is_allowed(filename, criteria):
 def query_filesize():
     """Receive POST data containing a filename"""
 
-
-    current_size = None
-
     # video or docs
     if is_allowed(request.form.get('file'), ALLOWED_VIDEO):
         root = VIDEO_ROOT
@@ -69,14 +67,11 @@ def query_filesize():
             request.form.get('file'))
 
     if os.path.isfile(path):
-        return jsonify({'error': 'file already uploaded', 'status': 'uploaded'})
-    elif not os.path.isfile(path + '.part'):
-        current_size = 0
+        current_size = os.stat(path).st_size
     else:
-        current_size = os.stat(path + '.part').st_size
+        current_size = 0
 
-    status = 'in progress'
-    return jsonify({"server_size":current_size, "status":status})
+    return jsonify({"server_size":current_size})
 
 
 @app.route('/chunked_send', methods=['POST'])
@@ -125,7 +120,7 @@ def end_transmission():
     elif ext in ALLOWED_DOCUMENTS:
         root = DOCUMENT_ROOT
     else:
-        return jsonify({'ERROR': '405: filetype not allowed'})
+        return jsonify({'error': '400: filetype not allowed'})
 
     path = os.path.join(root, request.form.get('company'),\
             request.form.get('project'), request.form.get('subproject'),\
@@ -146,16 +141,20 @@ def upload_file():
     sent_file = request.files.values()[0]
 
     if is_allowed(sent_file.filename, ALLOWED_VIDEO):
+        print('to video')
         root = VIDEO_ROOT
     elif is_allowed(sent_file.filename, ALLOWED_DOCUMENTS):
+        print('to docs')
         root = DOCUMENT_ROOT
     else:
-        return jsonify({'error': '405: invalid filetype'})
+        return jsonify({'error': '400: invalid filetype'})
 
-    sent_file.save(os.path.join(root, ajax.get('company'), ajax.get('project'),\
-            ajax.get('subproject'), secure_filename(sent_file.filename)))
+    path = os.path.join(root, ajax.get('company'), ajax.get('project'),\
+            ajax.get('subproject'), secure_filename(sent_file.filename))
+    print path
+    sent_file.save(path)
 
-    return jsonify({'status': 'success'})
+    return jsonify({'status': sent_file.filename + ' uploaded successfully.'})
 
 
 @app.errorhandler(404)

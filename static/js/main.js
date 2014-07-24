@@ -52,8 +52,10 @@ function companyEval() {
 function projectEval() {
     if ($("#project").val().length > 0) {
         $("#company").attr("disabled", true);
+        $("#company").css("background-color", '#eee');
     } else {
         $("#company").removeAttr("disabled");
+        $("#company").css("background-color", 'white');
     }
     if (isValidProject(projectList, $("#project").val())) {
         $("#subproject").removeAttr("disabled");
@@ -64,16 +66,17 @@ function projectEval() {
 }
 
 function subprojEval() {
-        console.log('subprojeval');
         if ($("#subproject").val() > 0) {
             $("#project").attr("disabled", true);
+            $("#project").css("background-color", '#eee');
         } else {
             $("#project").removeAttr("disabled");
+            $("#project").css("background-color", 'white');
         }
         if (isValidSubproj($("#subproject").val())) {
-            $("#files").removeAttr("disabled");
+            $("button#confirm").removeAttr("disabled");
         } else {
-            $("#files").attr("disabled", true);
+            $("button#confirm").attr("disabled", true);
         }
 }
 
@@ -165,128 +168,51 @@ function fetchSubprojects(companyIndex, projectIndex) {
 
 
 
-
 // files api
 isGoodSize = function(fileSize) {return fileSize < 5000000000};
 
-tst = function() {
-        formDataA = new FormData();
-        formDataA.append('company', $('input#company').val());
-        formDataA.append('project', $('input#project').val());
-        formDataA.append('subproject', $('select#subproject option:selected').text());
-        formDataA.append('file', files.list()[0].name);
-        $.ajax({
-            url: '/getfilesize',
-            type: 'GET',
-            dataType: 'json',
-            data: formDataA,
-            cache: false,
-            contentType: false,
-            processData: false
-        })
-    }
-
 
 BigFile = function(file){
-    var bf, f;
+    var bf;
     bf = {};
     bf.name = file.name;
     bf.targetSize = file.size;
+    bf.file = file;
 
-    f = new FileReader();
-    f.onload = function(e) {
-        var mimeString, byteString, divsTo;
-        mimeString = f.result .split(',')[0].split(':')[1].split(';')[0];
-        byteString = f.result.split(',')[1];
-
-        divsTo = parseInt(byteString.length/100000);
-        bf.clientChunkCount = byteString%100000 === 0 ? divsTo : divsTo + 1;
-        bf.mime = mimeString;
-        bf.bytes = byteString;
-        bf.byteLen = byteString.length;
-        bf.queryServerSide();
-    };
-
-    f.readAsDataURL(file);
-
-
-    bf.getChunk = function(chunkNum) {
-
-        byteStart = (chunkNum-1)*100000
-        return bf.bytes.slice(byteStart, byteStart+100000)
+    bf.isUploaded = function() {
+        return (bf.serverSize === bf.targetSize)
     }
 
-    function nextChunkOrNot(serverSize, localSize) {
-        if (serverSize > localSize) {
-            return
-        } else if (serverSize === localSize) {
-            return finishTransmission()
-        } else if (serverSize === null){
-            return
+    bf.send = function(){
+        files.fileTableRows().eq(files.currentFile-1).removeClass('danger');
+        if (self.isUploaded) {
+            files.fileTableRows().eq(files.currentFile-1).addClass('success');
+            files.sendNext();
         } else {
-            return nextChunk(serverSize)
+            files.fileTableRows().eq(files.currentFile-1).addClass('warning');
+            var fd;
+            fd = new FormData();
+            fd.append('company', $('input#company').val());
+            fd.append('project', $('input#project').val());
+            fd.append('subproject', $('select#subproject option:selected').text());
+            fd.append('file', bf.file);
+            fd.append('extension', bf.name.split('.')[1]);
+            $.ajax({
+                url: '/send_file',
+                type: 'POST',
+                dataType: 'json',
+                data: fd,
+                cache: false,
+                contentType: false,
+                processData: false,
+            }).success(function(r){
+                console.log(r);
+                files.fileTableRows().eq(files.currentFile-1).addClass('success');
+                console.log(files.fileTableRows().eq(files.currentFile-1))
+                console.log(files.currentFile-1)
+                files.sendNext();
+            });
         }
-    }
-
-    function nextChunk(serverSize){
-        var chunksDone;
-        chunksDone = serverSize/100000;
-        return sendChunk(chunksDone+1);
-    }
-
-    function finishTransmission() {
-        var fd;
-        fd = new FormData();
-        fd.append('company', $('input#company').val());
-        fd.append('project', $('input#project').val());
-        fd.append('subproject', $('select#subproject option:selected').text());
-        fd.append('file', bf.name);
-        fd.append('extension', bf.name.split('.')[1]);
-        $.ajax({
-            url: '/finish_send',
-            type: 'POST',
-            dataType: 'json',
-            data: fd,
-            cache: false,
-            contentType: false,
-            processData: false,
-        }).success(function(r){
-            bf.status = r.status;
-            files.display();
-            files.registerNext();
-        });
-    }
-
-    bf.sendFile = function(){
-        if (bf.status === 'in progress') {
-            return sendChunk(1)
-        } else {
-            files.registerNext();
-        }
-    }
-
-    function sendChunk(whichChunk) {
-        var fd;
-        fd = new FormData();
-        fd.append('company', $('input#company').val());
-        fd.append('project', $('input#project').val());
-        fd.append('subproject', $('select#subproject option:selected').text());
-        fd.append('file', bf.name);
-        fd.append('data', bf.getChunk(whichChunk));
-        fd.append('extension', bf.name.split('.')[1]);
-        fd.append('intent', whichChunk);
-        $.ajax({
-            url: '/chunked_send',
-            type: 'POST',
-            dataType: 'json',
-            data: fd,
-            cache: false,
-            contentType: false,
-            processData: false,
-        }).success(function(r){
-            nextChunkOrNot(r.serverSize, bf.byteLen);
-            console.log(r);
-        })
     }
 
     bf.queryServerSide = function() {
@@ -305,11 +231,9 @@ BigFile = function(file){
             contentType: false,
             processData: false
         }).success(function(r){
+            console.log(r);
             var divsTo;
             bf.serverSize = r.server_size;
-            divsTo = parseInt(bf.serverSize/1000);
-            bf.serverChunkCount = file.size%1000 === 0 ? divsTo : divsTo + 1;
-            bf.status = r.status;
             if (r.error){
                 bf.error = r.error;
             }
@@ -317,43 +241,37 @@ BigFile = function(file){
             _.each(files.uploadObjs, function(elem, ind){
                 displayedFiles.eq(ind).removeClass('danger');
                 displayedFiles.eq(ind).removeClass('success');
-                displayedFiles.eq(ind).removeClass('warn');
-                switch(elem.status){
-                    case 'error':
-                        displayedFiles.eq(ind).addClass('danger');
-                    case 'uploaded':
-                        displayedFiles.eq(ind).addClass('success');
-                    case 'in progress':
-                        displayedFiles.eq(ind).addClass('warn');
-                }
+                displayedFiles.eq(ind).removeClass('warning');
             });
         }).error(function(e) {
             console.log(e);
         });
     };
+    bf.queryServerSide();
 
     return bf
 };
 
 
 files = (function($, _) {
-    var f, registerUpChunk, inFiles, presentation, fileCount, currentFile;
+    var f, registerUpChunk, inFiles, presentation, fileCount;
     f = {};
     // register a file as an upchunk object
-    registerFile = function(ind) {
-        f.registeredFile = BigFile(f.list()[ind])
+    registerFiles = function() {
+        f.registeredFiles = _.map(f.list(), function(elem){return BigFile(elem)});
     }
 
-    f.registerNext = function() {
+    f.sendNext = function() {
         if (fileCount > 0) {
-            registerFile(currentFile);
-            currentFile += 1;
+            f.registeredFiles[f.currentFile].send();
+            f.currentFile += 1;
             fileCount -= 1;
         }
     }
 
     inFiles = $("input#fileinput");
-    presentation = $('table tbody.files')
+    presentation = $('table#fileList tbody.files');
+    assistTable = $('table#assistList tbody');
     f.list = function(){
         return inFiles.get(0).files;
     };
@@ -371,16 +289,19 @@ files = (function($, _) {
         };
         presentation.empty();
         fileCount = f.list().length;
-        currentFile = 0;
-        f.registerNext();
+        f.currentFile = 0;
+        registerFiles();
         _.each(f.list(), addFileRow);
-        if (f.list().length > 1) {
+        if (f.list().length > 0) {
             $("#upload-btn").removeAttr("disabled");
+            $('table#fileList').css('visibility', 'visible');
         } else {
             $("#upload-btn").attr("disabled", true);
+            $('table#fileList').css('visibility', 'hidden');
         }
     }
     f.pres = $("table#filepres tbody.files");
+    f.fileTableRows = function(){return $("table#fileList tbody tr")};
 
     return f;
 }(jQuery, _));
@@ -442,9 +363,15 @@ $(document).ready(function(){
         projectEval();
     });
     $("#subproject").change(function() {
+        console.log('test');
         subprojEval();
     });
-    $("#fileinput").change(function(){files.display()});
+    $("#fileinput").change(function(){
+        files.display();
+        if (files.list().length > 0){
+            $('button#upload-btn').removeAttr('disabled');
+        }
+    });
 
     $("#files").change(function() {
         //fileEval();
@@ -459,8 +386,19 @@ $(document).ready(function(){
         });
     });
 
+    $("button#confirm").click(function(e){
+        e.preventDefault();
+        $('select#subproject').attr('disabled', true);
+        $('button#confirm').attr('disabled', true);
+        $('input#fileinput').removeAttr('disabled');
+        $('span#add-files').removeAttr('disabled');
+        //change text color
+        $('h2.text-center').eq(0).css('color', '#eee');
+        $('h2.text-center').eq(1).css('color', 'rgb(51,51,51)');
+    });
+
     $("button#upload-btn").click(function(e){
-        e.preventDefault()
+        e.preventDefault();
 
         var formData = new FormData();
         formData.append('company', $('input#company').val())
@@ -473,16 +411,7 @@ $(document).ready(function(){
                 console.log("file too large");
             }
         });
-
-        $.ajax({
-            url: '/sendfiles',
-            type: 'POST',
-            dataType: 'json',
-            data: formData,
-            cache: false,
-            contentType: false,
-            processData: false
-        });
     });
+
 
 });

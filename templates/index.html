@@ -23,7 +23,6 @@
     </head>
 
     <body>
-
         <div class="container-fluid voffset5">
             <h1 class="text-center">Design Science Upload Interface</h1>
 
@@ -59,7 +58,7 @@
                         <div class="form-group">
                             <div class="btn-group-justified">
                             <div class="btn-group">
-                                <button id="confirm" type="submit" class="btn btn-lg btn-primary btn-block">
+                                <button id="confirm" type="submit" class="btn btn-lg btn-primary btn-block" disabled>
                                     <span class="glyphicon glyphicon-ok"></span>
                                     <span>Confirm Settings</span>
                                 </button>
@@ -71,14 +70,14 @@
                 </div>
 
                 <div id="fileTable" class="col-md-8">
-                    <h2 class="text-center">2. Choose the files you'd like to upload</h2>
+                    <h2 class="text-center" style="color:#eee">2. Choose the files you'd like to upload</h2>
                     <form id="fileupload" class="form-horizontal" action"//archive.dscience.com/sendfiles" method="POST" enctype="multipart/form-data">
                         <div class="btn-group btn-group-justified">
                             <div class="btn-group">
-                                <span id="add-files" class="btn btn-lg btn-success fileinput-button">
+                                <span id="add-files" class="btn btn-lg btn-success fileinput-button" disabled>
                                     <span class="glyphicon glyphicon-plus"></span>
                                     <span>Add Files</span>
-                                    <input id="fileinput" type="file" name="files[]" multiple>
+                                    <input id="fileinput" type="file" name="files[]" multiple disabled>
                                 </span>
                             </div>
 
@@ -90,14 +89,14 @@
                             </div>
 
                             <div class="btn-group">
-                                <button type="reset" class="btn btn-lg btn-warning cancel">
+                                <button type="reset" class="btn btn-lg btn-warning cancel" disabled>
                                     <span class="glyphicon glyphicon-ban-circle"></span>
                                     <span>Cancel Upload</span>
                                 </button>
                             </div>
                         </div>
                     </form>
-                    <table role="presentation" class="table table-condensed table-hover table-bordered voffset4">
+                    <table id="fileList" role="presentation" class="table table-condensed table-hover voffset4" style="visibility:hidden;">
                         <thead>
                             <tr>
                                 <th>Filename</th>
@@ -113,9 +112,7 @@
             </div>
         </div>
 
-
         <!--script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script-->
-        <!-- Include all compiled plugins (below), or include individual files as needed -->
         <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/Base64/0.3.0/base64.min.js"></script>
         <script type="text/javascript" src="bower_components/jquery/dist/jquery.js"></script>
         <script type="text/javascript" src="bower_components/underscore/underscore.js"></script>
