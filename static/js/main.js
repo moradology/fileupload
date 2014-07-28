@@ -208,7 +208,7 @@ BigFile = function(file){
             fd.append('file', bf.file);
             fd.append('extension', bf.name.split('.')[1]);
             $.ajax({
-                url: '/send_file',
+                url: '/upload/send_file',
                 type: 'POST',
                 dataType: 'json',
                 data: fd,
@@ -231,7 +231,7 @@ BigFile = function(file){
         fd.append('subproject', $('select#subproject option:selected').text());
         fd.append('file', bf.name)
         $.ajax({
-            url: '/getfilesize',
+            url: '/upload/getfilesize',
             type: 'POST',
             dataType: 'json',
             data: fd,
