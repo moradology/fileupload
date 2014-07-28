@@ -110,7 +110,7 @@ function onSelectedProject($e, datum) {
 
 function fetchCompanies() {
     return $.ajax({
-        url: '/dstatus/api/clients',
+        url: '/upload/dstatus/api/clients',
         success: function(data){
             var clients = data.clients;
             clients = $.map(clients, function(obj,ind){return {val:obj.name}});
@@ -122,7 +122,7 @@ function fetchCompanies() {
 }
 
 function fetchProjects(companyIndex) {
-    var url = 'dstatus/api/clients/'
+    var url = '/upload/dstatus/api/clients/'
     url = url + (companyIndex).toString();
     url = url + '/projects'
     return $.ajax({
@@ -138,7 +138,7 @@ function fetchProjects(companyIndex) {
 }
 
 function fetchSubprojects(companyIndex, projectIndex) {
-    var url = '/dstatus/api/clients/';
+    var url = '/upload/dstatus/api/clients/';
     var $subproj = $('select#subproject');
     url = url + (companyIndex).toString();
     url = url + '/projects/';

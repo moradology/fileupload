@@ -503,9 +503,9 @@ def add_resources():
     participant_string = participants_string + '/<int:participant_id>'
     api.add_resource(ParticipantAPI, participant_string, endpoint='participant')
 
+add_resources()
 
 
 if __name__ == '__main__':
-    add_resources()
     app.run(debug=True, port=8888)
 
