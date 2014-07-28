@@ -9,10 +9,15 @@ div#fileTable {
 }
 
 html {
-    position: fixed;
+    /*position: fixed;
     height: 100%;
     background-image: url("../img/bground.svg");
-    background-size: 100%;
+    background-size: 100%;*/
+}
+
+.fullheight {
+    min-height: 600px;
+    height: 100vh;
 }
 
 .spinner {

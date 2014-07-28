@@ -24,91 +24,98 @@
 
     <body>
         <div class="container-fluid voffset5">
-            <h1 class="text-center">Design Science Upload Interface</h1>
+            <div class="fullheight">
+                <img src="img/dslogo.png" style="display:block;margin: 0 auto 0 auto;">
 
-            <div class="row voffset5">
+                <div class="container voffset5">
 
-                <div id="projectSelect" class="col-md-4">
-                    <h2 class="text-center">1. Select the upload location</h2>
-                    <form id="projectForm" class="form-horizontal">
+                    <div id="projectSelect" class="row">
+                        <div class="col-md-8 col-md-offset-2">
+                            <h2 class="page-header">1. Select the upload location</h2>
+                            <form id="projectForm" class="form-horizontal">
 
-                        <div class="form-group">
-                            <label for="company" class="col-sm-2 control-label">Company</label>
-                            <div id="bhCompany" class="col-sm-10">
-                                <input class="typeahead form-control" type="text" id="company" name="company" placeholder="Company">
-                            </div>
+                                <div class="form-group">
+                                    <label for="company" class="">Company</label>
+                                    <div id="bhCompany" class="">
+                                        <input class="typeahead form-control" type="text" id="company" name="company" placeholder="Company">
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="project" class="">Project</label>
+                                    <div id="bhProject" class="">
+                                        <input disabled class=" typeahead form-control" type="text" id="project" name="project" placeholder="Project Code">
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="subproject" class="">Phase</label>
+                                    <div class="">
+                                        <select disabled class="form-control" id="subproject" name="subproject" placeholder="Project Phase">
+                                            <option value="0">Select Project Phase</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <div class="btn-group-justified">
+                                        <div class="btn-group">
+                                            <button id="confirm" type="submit" class="btn btn-lg btn-primary btn-block" disabled>
+                                                <span class="glyphicon glyphicon-ok"></span>
+                                                <span>Confirm Settings</span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </form>
                         </div>
-
-                        <div class="form-group">
-                            <label for="project" class="col-sm-2 control-label">Project</label>
-                            <div id="bhProject" class="col-sm-10">
-                                <input disabled class=" typeahead form-control" type="text" id="project" name="project" placeholder="Project Code">
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="subproject" class="col-sm-2 control-label">Phase</label>
-                            <div class="col-sm-10">
-                                <select disabled class="form-control" id="subproject" name="subproject" placeholder="Project Phase">
-                                    <option value="0">Select Project Phase</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <div class="btn-group-justified">
-                            <div class="btn-group">
-                                <button id="confirm" type="submit" class="btn btn-lg btn-primary btn-block" disabled>
-                                    <span class="glyphicon glyphicon-ok"></span>
-                                    <span>Confirm Settings</span>
-                                </button>
-                            </div>
-                            </div>
-                        </div>
-
-                    </form>
+                    </div>
                 </div>
+            </div>
 
-                <div id="fileTable" class="col-md-8">
-                    <h2 class="text-center" style="color:#eee">2. Choose the files you'd like to upload</h2>
-                    <form id="fileupload" class="form-horizontal" action"//archive.dscience.com/sendfiles" method="POST" enctype="multipart/form-data">
-                        <div class="btn-group btn-group-justified">
-                            <div class="btn-group">
-                                <span id="add-files" class="btn btn-lg btn-success fileinput-button" disabled>
-                                    <span class="glyphicon glyphicon-plus"></span>
-                                    <span>Add Files</span>
-                                    <input id="fileinput" type="file" name="files[]" multiple disabled>
-                                </span>
-                            </div>
+            <div class="fullheight">
+                <div id="fileTable" class="row">
+                    <div class="col-md-8 col-md-offset-2">
+                        <h2 class="page-header" style="color:#eee">2. Choose the files you'd like to upload</h2>
+                        <form id="fileupload" class="form-horizontal" action"//archive.dscience.com/sendfiles" method="POST" enctype="multipart/form-data">
+                            <div class="btn-group btn-group-justified">
+                                <div class="btn-group">
+                                    <span id="add-files" class="btn btn-lg btn-primary fileinput-button" disabled>
+                                        <span class="glyphicon glyphicon-plus"></span>
+                                        <span>Add Files</span>
+                                        <input id="fileinput" type="file" name="files[]" multiple disabled>
+                                    </span>
+                                </div>
 
-                            <div class="btn-group">
-                                <button disabled id="upload-btn" class="btn btn-lg btn-primary start">
-                                    <span class="glyphicon glyphicon-upload"></span>
-                                    <span>Start Upload</span>
-                                </button>
-                            </div>
+                                <div class="btn-group">
+                                    <button disabled id="upload-btn" class="btn btn-lg btn-success start">
+                                        <span class="glyphicon glyphicon-upload"></span>
+                                        <span>Start Upload</span>
+                                    </button>
+                                </div>
 
-                            <div class="btn-group">
-                                <button type="reset" class="btn btn-lg btn-warning cancel" disabled>
-                                    <span class="glyphicon glyphicon-ban-circle"></span>
-                                    <span>Cancel Upload</span>
-                                </button>
+                                <!--div class="btn-group">
+                                    <button type="reset" class="btn btn-lg btn-warning cancel" disabled>
+                                        <span class="glyphicon glyphicon-ban-circle"></span>
+                                        <span>Cancel Upload</span>
+                                    </button>
+                                </div-->
                             </div>
-                        </div>
-                    </form>
-                    <table id="fileList" role="presentation" class="table table-condensed table-hover voffset4" style="visibility:hidden;">
-                        <thead>
-                            <tr>
-                                <th>Filename</th>
-                                <th>File Type</th>
-                                <th>File Size</th>
-                            </tr>
-                        </thead>
-                        <tbody class="files">
-                        </tbody>
-                    </table>
+                        </form>
+                        <table id="fileList" role="presentation" class="table table-condensed table-hover voffset4" style="visibility:hidden;">
+                            <thead>
+                                <tr>
+                                    <th>Filename</th>
+                                    <th>File Type</th>
+                                    <th>File Size</th>
+                                </tr>
+                            </thead>
+                            <tbody class="files">
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
-
             </div>
         </div>
 

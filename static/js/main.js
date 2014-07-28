@@ -403,6 +403,9 @@ $(document).ready(function(){
         //change text color
         $('h2.text-center').eq(0).css('color', '#eee');
         $('h2.text-center').eq(1).css('color', 'rgb(51,51,51)');
+        $('html,body').animate({
+            scrollTop: $('#fileTable').offset().top
+        }, 1000);
     });
 
     $("button#upload-btn").click(function(e){
