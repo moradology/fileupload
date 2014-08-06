@@ -423,7 +423,8 @@ class ParticipantListAPI(Resource):
 
         # list of participants
         participants = participant_list(clientname, projectname, subprojectname)
-        participants = make_participant(subprojects, cli_id, proj_id, subproj_id)
+        participants = make_participant(participants, cli_id, proj_id,\
+                subproj_id)
 
         if len(subprojects) == 0:
             abort(404)

@@ -110,7 +110,7 @@ function onSelectedProject($e, datum) {
 
 function fetchCompanies() {
     return $.ajax({
-        url: '/upload/dstatus/api/clients',
+        url: 'dstatus/api/clients',
         success: function(data){
             var clients = data.clients;
             clients = $.map(clients, function(obj,ind){return {val:obj.name}});
@@ -122,7 +122,7 @@ function fetchCompanies() {
 }
 
 function fetchProjects(companyIndex) {
-    var url = '/upload/dstatus/api/clients/'
+    var url = 'dstatus/api/clients/'
     url = url + (companyIndex).toString();
     url = url + '/projects'
     return $.ajax({
@@ -138,7 +138,7 @@ function fetchProjects(companyIndex) {
 }
 
 function fetchSubprojects(companyIndex, projectIndex) {
-    var url = '/upload/dstatus/api/clients/';
+    var url = 'dstatus/api/clients/';
     var $subproj = $('select#subproject');
     url = url + (companyIndex).toString();
     url = url + '/projects/';
@@ -208,7 +208,7 @@ BigFile = function(file){
             fd.append('file', bf.file);
             fd.append('extension', bf.name.split('.')[1]);
             $.ajax({
-                url: '/upload/send_file',
+                url: '/send_file',
                 type: 'POST',
                 dataType: 'json',
                 data: fd,
@@ -231,7 +231,7 @@ BigFile = function(file){
         fd.append('subproject', $('select#subproject option:selected').text());
         fd.append('file', bf.name)
         $.ajax({
-            url: '/upload/getfilesize',
+            url: '/getfilesize',
             type: 'POST',
             dataType: 'json',
             data: fd,
@@ -401,8 +401,8 @@ $(document).ready(function(){
         $('input#fileinput').removeAttr('disabled');
         $('span#add-files').removeAttr('disabled');
         //change text color
-        $('h2.text-center').eq(0).css('color', '#eee');
-        $('h2.text-center').eq(1).css('color', 'rgb(51,51,51)');
+        $('h2.page-header').eq(0).css('color', '#eee');
+        $('h2.page-header').eq(1).css('color', 'rgb(51,51,51)');
         $('html,body').animate({
             scrollTop: $('#fileTable').offset().top
         }, 1000);
