@@ -230,23 +230,35 @@ def make_participant(participant_names, cli_id, proj_id, subproj_id):
 
 
 # produce lists of data
-client_list = os.listdir('/var/store/video')
+client_list = cli_list()
 clients = make_cli(client_list)
+
+def cli_list():
+    """a"""
+    path = '/var/store/video'
+    folders = filter(os.path.isdir, path+'/'+os.listdir(path))
+    return map(os.path.basename, folders)
+
 
 def project_list(client):
     """a"""
-    return os.listdir('/var/store/video/{0}'.format(client))
+    path = '/var/store/video/{0}'.format(client)
+    folders = filter(os.path.isdir, path+'/'+os.listdir(path))
+    return map(os.path.basename, folders)
 
 
 def subproject_list(client, proj):
     """a"""
-    return os.listdir('/var/store/video/{0}/{1}'.format(client, proj))
+    path = '/var/store/video/{0}'.format(client)
+    folders = filter(os.path.isdir, path+'/'+os.listdir(path))
+    return map(os.path.basename, folders)
 
 
 def participant_list(client, proj, subproj):
     """a"""
-    return os.listdir('/var/store/video/{0}/{1}/{2}'.format(client,\
-            proj, subproj))
+    path = '/var/store/video/{0}/{1}/{2}'.format(client, proj, subproj)
+    files = filter(os.path.isfile, path+'/'+os.listdir(path))
+    return map(os.path.basename, files)
 
 
 
