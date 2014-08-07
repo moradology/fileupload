@@ -236,7 +236,7 @@ def cli_list():
     path = '/var/store/video'
     folders = map(lambda x: path + '/' + x, os.listdir(path))
     folders = filter(os.path.isdir, folders)
-    return map(os.path.basename, folders)
+    return list(map(os.path.basename, folders))
 
 
 def project_list(client):
@@ -244,7 +244,7 @@ def project_list(client):
     path = '/var/store/video/{0}'.format(client)
     folders = map(lambda x: path + '/' + x, os.listdir(path))
     folders = filter(os.path.isdir, folders)
-    return map(os.path.basename, folders)
+    return list(map(os.path.basename, folders))
 
 
 def subproject_list(client, proj):
@@ -252,7 +252,7 @@ def subproject_list(client, proj):
     path = '/var/store/video/{0}/{1}'.format(client, proj)
     folders = map(lambda x: path + '/' + x, os.listdir(path))
     folders = filter(os.path.isdir, folders)
-    return map(os.path.basename, folders)
+    return list(map(os.path.basename, folders))
 
 
 def participant_list(client, proj, subproj):
@@ -260,7 +260,7 @@ def participant_list(client, proj, subproj):
     path = '/var/store/video/{0}/{1}/{2}'.format(client, proj, subproj)
     files = map(lambda x: path + '/' + x, os.listdir(path))
     files = filter(os.path.isfile, folders)
-    return map(os.path.basename, files)
+    return list(map(os.path.basename, files))
 
 
 client_list = cli_list()
