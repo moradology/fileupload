@@ -230,37 +230,41 @@ def make_participant(participant_names, cli_id, proj_id, subproj_id):
 
 
 # produce lists of data
-client_list = cli_list()
-clients = make_cli(client_list)
 
 def cli_list():
     """a"""
     path = '/var/store/video'
-    folders = filter(os.path.isdir, path+'/'+os.listdir(path))
+    folders = map(lambda x: path + '/' + x, os.listdir(path))
+    folders = filter(os.path.isdir, folders)
     return map(os.path.basename, folders)
 
 
 def project_list(client):
     """a"""
     path = '/var/store/video/{0}'.format(client)
-    folders = filter(os.path.isdir, path+'/'+os.listdir(path))
+    folders = map(lambda x: path + '/' + x, os.listdir(path))
+    folders = filter(os.path.isdir, folders)
     return map(os.path.basename, folders)
 
 
 def subproject_list(client, proj):
     """a"""
-    path = '/var/store/video/{0}'.format(client)
-    folders = filter(os.path.isdir, path+'/'+os.listdir(path))
+    path = '/var/store/video/{0}/{1}'.format(client, proj)
+    folders = map(lambda x: path + '/' + x, os.listdir(path))
+    folders = filter(os.path.isdir, folders)
     return map(os.path.basename, folders)
 
 
 def participant_list(client, proj, subproj):
     """a"""
     path = '/var/store/video/{0}/{1}/{2}'.format(client, proj, subproj)
-    files = filter(os.path.isfile, path+'/'+os.listdir(path))
+    files = map(lambda x: path + '/' + x, os.listdir(path))
+    files = filter(os.path.isfile, folders)
     return map(os.path.basename, files)
 
 
+client_list = cli_list()
+clients = make_cli(client_list)
 
 # CLIENT LEVEL
 # list clients
