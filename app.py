@@ -9,6 +9,7 @@ from flask.views import MethodView
 from flask.ext.restful import Api, Resource, reqparse, fields, marshal
 from flask.ext.httpauth import HTTPBasicAuth
 from werkzeug.utils import secure_filename
+from passlib.hash import sha256_crypt
 import os
 import base64
 
@@ -16,19 +17,33 @@ app = Flask(__name__, static_url_path = "")
 api = Api(app)
 auth = HTTPBasicAuth()
 
-
 @app.route('/')
 @app.route('/index')
 def index():
     """a"""
     return render_template("index.html")
 
+users = {
+        "dscience": "!usability"
+}
+
 @auth.get_password
 def get_pass(username):
     """a"""
-    if username == 'dscience':
-        return 'testing'
+    if username in users:
+        return users.get(username)
     return None
+
+@auth.hash_password
+
+@auth.verify_password
+def verify_password(username, password):
+    name = 'dscience'
+    passhash = '$5$rounds=110000$jOW224mvS2F4LU2n$jbOIGMNl6dcdcVtqsg.jRUZJt/CzQe0kQdllykKLnf1'
+    if username != name:
+        return False
+    return sha256_crypt.verify(password, passhash)
+
 
 
 VIDEO_ROOT = '/var/store/video/'
@@ -270,6 +285,8 @@ clients = make_cli(client_list)
 # list clients
 class ClientListAPI(Resource):
 
+    decorators = [auth.login_required]
+
     def __init__(self):
         self.reqparse = reqparse.RequestParser()
         self.reqparse.add_argument('name', type=str, required=True,\
@@ -283,6 +300,8 @@ class ClientListAPI(Resource):
 
 # specific client
 class ClientAPI(Resource):
+
+    decorators = [auth.login_required]
 
     def __init__(self):
         self.reqparse = reqparse.RequestParser()
@@ -302,6 +321,8 @@ class ClientAPI(Resource):
 # PROJECT LEVEL
 # list projects
 class ProjectListAPI(Resource):
+
+    decorators = [auth.login_required]
 
     def __init__(self):
         self.reqparse = reqparse.RequestParser()
@@ -327,6 +348,8 @@ class ProjectListAPI(Resource):
 # specific project
 class ProjectAPI(Resource):
 
+    decorators = [auth.login_required]
+
     def __init__(self):
         self.reqparse = reqparse.RequestParser()
         self.reqparse.add_argument('code', type=str, required=True,\
@@ -350,6 +373,8 @@ class ProjectAPI(Resource):
 # SUBPROJECT LEVEL
 # list subprojects
 class SubprojectListAPI(Resource):
+
+    decorators = [auth.login_required]
 
     def __init__(self):
         self.reqparse = reqparse.RequestParser()
@@ -380,6 +405,8 @@ class SubprojectListAPI(Resource):
 
 # specific project
 class SubprojectAPI(Resource):
+
+    decorators = [auth.login_required]
 
     def __init__(self):
         self.reqparse = reqparse.RequestParser()
@@ -413,6 +440,8 @@ class SubprojectAPI(Resource):
 # PARTICIPANT LEVEL
 # list participants
 class ParticipantListAPI(Resource):
+
+    decorators = [auth.login_required]
 
     def __init__(self):
         self.reqparse = reqparse.RequestParser()
@@ -450,6 +479,8 @@ class ParticipantListAPI(Resource):
 
 # specific participant
 class ParticipantAPI(Resource):
+
+    decorators = [auth.login_required]
 
     def __init__(self):
         self.reqparse = reqparse.RequestParser()
