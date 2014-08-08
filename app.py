@@ -17,24 +17,6 @@ app = Flask(__name__, static_url_path = "")
 api = Api(app)
 auth = HTTPBasicAuth()
 
-@app.route('/')
-@app.route('/index')
-def index():
-    """a"""
-    return render_template("index.html")
-
-users = {
-        "dscience": "!usability"
-}
-
-@auth.get_password
-def get_pass(username):
-    """a"""
-    if username in users:
-        return users.get(username)
-    return None
-
-@auth.hash_password
 
 @auth.verify_password
 def verify_password(username, password):
@@ -44,6 +26,13 @@ def verify_password(username, password):
         return False
     return sha256_crypt.verify(password, passhash)
 
+
+@app.route('/')
+@app.route('/index')
+@auth.login_required
+def index():
+    """a"""
+    return render_template("index.html")
 
 
 VIDEO_ROOT = '/var/store/video/'
@@ -65,6 +54,7 @@ def is_allowed(filename, criteria):
 
 
 @app.route('/getfilesize', methods=['POST'])
+@auth.login_required
 def query_filesize():
     """Receive POST data containing a filename"""
 
@@ -90,6 +80,7 @@ def query_filesize():
 
 
 @app.route('/chunked_send', methods=['POST'])
+@auth.login_required
 def chunked_transmission():
     """Receive POST of a portion of a file; handle data appropriately"""
     ajax = request.form
@@ -125,6 +116,7 @@ def chunked_transmission():
 
 
 @app.route('/finish_send', methods=['POST'])
+@auth.login_required
 def end_transmission():
     """End transmission and convert from base64 back to binary"""
     ajax = request.form
@@ -150,6 +142,7 @@ def end_transmission():
 
 
 @app.route('/send_file', methods=['POST'])
+@auth.login_required
 def upload_file():
     """Receive POST data containing at least one file upload"""
     ajax = request.form
