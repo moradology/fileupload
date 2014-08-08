@@ -171,10 +171,10 @@ def not_found(error):
     return make_response(jsonify({'error': 'Not found'}), 404)
 
 
-@auth.error_handler
-def unauthorized():
-    """a"""
-    return make_response(jsonify({'message': 'Unauthorized access'}), 403)
+#@auth.error_handler
+#def unauthorized():
+#    """a"""
+#    return make_response(jsonify({'message': 'Unauthorized access'}), 403)
 
 FIELDS = dict(
     client_fields={
