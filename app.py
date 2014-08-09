@@ -56,10 +56,14 @@ def is_allowed(filename, criteria):
 def check_credentials():
     password = request.form.get("password")
     passhash = '$5$rounds=110000$jOW224mvS2F4LU2n$jbOIGMNl6dcdcVtqsg.jRUZJt/CzQe0kQdllykKLnf1'
-    if sha256_crypt.verify(password, passhash):
-        status = "success"
-    else:
+    try:
+        if sha256_crypt.verify(password, passhash):
+            status = "success"
+        else:
+            status = "failure"
+    except TypeError:
         status = "failure"
+
     return jsonify({"status":status})
 
 
