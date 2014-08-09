@@ -52,8 +52,7 @@ def is_allowed(filename, criteria):
     return '.' in filename and \
             filename.rsplit('.', 1)[1] in criteria
 
-
-@app.route('/check_credentials', methods=['GET'])
+@app.route('/check_credentials', methods=['POST'])
 def check_credentials():
     password = request.form.get("password")
     passhash = '$5$rounds=110000$jOW224mvS2F4LU2n$jbOIGMNl6dcdcVtqsg.jRUZJt/CzQe0kQdllykKLnf1'
@@ -68,7 +67,7 @@ def check_credentials():
     return jsonify({"status":status})
 
 
-@app.route('/getfilesize', methods=['GET'])
+@app.route('/getfilesize', methods=['POST'])
 @auth.login_required
 def query_filesize():
     """Receive POST data containing a filename"""
