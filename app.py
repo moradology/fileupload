@@ -52,6 +52,16 @@ def is_allowed(filename, criteria):
     return '.' in filename and \
             filename.rsplit('.', 1)[1] in criteria
 
+@app.route('/check_credentials', methods=['POST'])
+def check_credentials():
+    password = request.form.get("password")
+    passhash = '$5$rounds=110000$jOW224mvS2F4LU2n$jbOIGMNl6dcdcVtqsg.jRUZJt/CzQe0kQdllykKLnf1'
+    if sha256_crypt.verify(password, passhash):
+        status = "success"
+    else:
+        status = "failure"
+    return jsonify({"status":status})
+
 
 @app.route('/getfilesize', methods=['POST'])
 @auth.login_required
@@ -167,7 +177,6 @@ def upload_file():
 
 @app.errorhandler(404)
 def not_found(error):
-    """a"""
     return make_response(jsonify({'error': 'Not found'}), 404)
 
 
@@ -205,14 +214,12 @@ FIELDS = dict(
 
 # simulate RDB data
 def make_cli(client_names):
-    """a"""
     new_list = []
     for ind, cli in enumerate(client_names):
         new_list.append({'name': cli, 'verified': False, 'cli_id': ind+1})
     return new_list
 
 def make_proj(project_names, cli_id):
-    """a"""
     new_list = []
     for ind, name in enumerate(project_names):
         new_list.append({'name': name, 'verified': False, 'cli_id': cli_id,\
@@ -220,7 +227,6 @@ def make_proj(project_names, cli_id):
     return new_list
 
 def make_subproj(subproject_names, cli_id, proj_id):
-    """a"""
     new_list = []
     for ind, name in enumerate(subproject_names):
         new_list.append({'name': name, 'verified': False, 'cli_id': cli_id,\
@@ -228,7 +234,6 @@ def make_subproj(subproject_names, cli_id, proj_id):
     return new_list
 
 def make_participant(participant_names, cli_id, proj_id, subproj_id):
-    """a"""
     new_list = []
     for ind, name in enumerate(participant_names):
         new_list.append({'name': name, 'verified': False, 'cli_id': cli_id,\
@@ -240,7 +245,6 @@ def make_participant(participant_names, cli_id, proj_id, subproj_id):
 # produce lists of data
 
 def cli_list():
-    """a"""
     path = '/var/store/video'
     folders = map(lambda x: path + '/' + x, os.listdir(path))
     folders = filter(os.path.isdir, folders)
@@ -256,7 +260,6 @@ def project_list(client):
 
 
 def subproject_list(client, proj):
-    """a"""
     path = '/var/store/video/{0}/{1}'.format(client, proj)
     folders = map(lambda x: path + '/' + x, os.listdir(path))
     folders = filter(os.path.isdir, folders)
@@ -264,7 +267,6 @@ def subproject_list(client, proj):
 
 
 def participant_list(client, proj, subproj):
-    """a"""
     path = '/var/store/video/{0}/{1}/{2}'.format(client, proj, subproj)
     files = map(lambda x: path + '/' + x, os.listdir(path))
     files = filter(os.path.isfile, folders)
